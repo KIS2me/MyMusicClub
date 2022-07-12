@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="music.mapper.SingerMapper">
+    <resultMap id="SingerResultMap" type="music.domain.Singer">
+        <!-- column是数据库中表的栏位名， property是实体对应的属性名-->
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="sex" jdbcType="TINYINT" property="sex"/>
+        <result column="pic" jdbcType="VARCHAR" property="pic"/>
+        <result column="birth" jdbcType="TIMESTAMP" property="birth"/>
+        <result column="location" jdbcType="VARCHAR" property="location"/>
+        <result column="introduction" jdbcType="VARCHAR" property="introduction"/>
+    </resultMap>
+
+    <sql id="BaseColumnList">
+        id, name, sex, pic, birth, location, introduction
+    </sql>
+
+    <!--增加-->
+    <insert id="insert" parameterType="Singer">
+        insert into singer
+        <trim prefix="(" suffix=")" suffixOverrides=","> /*suffixOverrides用于去掉最后那个逗号*/
+            <if test="id != null">
+                id,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="sex != null">
+                sex,
+            </if>
+            <if test="pic != null">
+                pic,
+            </if>
+            <if test="birth != null">
+                birth,
+            </if>
+            <if test="location != null">
+                location,
+            </if>
+            <if test="introduction != null">
+                introduction,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id},
+            </if>
+            <if test="name != null">
+                #{name},
+            </if>
+            <if test="sex != null">
+                #{sex},
+            </if>
+            <if test="pic != null">
+                #{pic},
+            </if>
+            <if test="birth != null">
+                #{birth},
+            </if>
+            <if test="location != null">
+                #{location},
+            </if>
+            <if test="introduction != null">
+                #{introduction},
+            </if>
+        </trim>
+    </insert>
+
+    <!--修改-->
+    <update id="update" parameterType="Singer">
+        update singer
+        <set>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="sex != null">
+                sex = #{sex},
+            </if>
+            <if test="pic != null">
+                pic = #{pic},
+            </if>
+            <if test="birth != null">
+                birth = #{birth},
+            </if>
+            <if test="location != null">
+                location = #{location},
+            </if>
+            <if test="introduction != null">
+                introduction = #{introduction},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--删除-->
+    <delete id="delete" parameterType="Integer">
+        delete from singer where id = #{id}
+    </delete>
+
+    <!--根据id查询-->
+    <select id="selectById" parameterType="Integer" resultMap="SingerResultMap">
+        select
+        <include refid="BaseColumnList"/>
+        from singer where id = #{id}
+    </select>
+
+    <!--查询所有歌手-->
+    <select id="selectAllSinger" resultMap="SingerResultMap">
+        select
+        <include refid="BaseColumnList"/>
+        from singer
+    </select>
+
+    <!--根据歌手名字模糊查询列表-->
+    <select id="selectLikeName" parameterType="String" resultMap="SingerResultMap" >
+        select
+        <include refid="BaseColumnList"/>
+        from singer
+        where name like concat('%', #{name}, '%')
+    </select>
+
+    <!--根据性别查询-->
+    <select id="selectBySex" parameterType="Byte" resultMap="SingerResultMap">
+        select
+        <include refid="BaseColumnList"/>
+        from singer
+        where sex = #{sex}
+    </select>
+
+    <!--分页查询歌手-->
+    <select id="selectSingerForPage" parameterType="Integer" resultMap="SingerResultMap">
+        select
+        <include refid="BaseColumnList"/>
+        from singer
+        limit #{page}, 5
+    </select>
+</mapper>

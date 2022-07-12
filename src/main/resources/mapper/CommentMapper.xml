@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="music.mapper.CommentMapper">
+    <resultMap id="BaseResultMap" type="music.domain.Comment">
+        <!-- column是数据库中表的栏位名， property是实体对应的属性名-->
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="userId" jdbcType="INTEGER" property="user_id"/>
+        <result column="songId" jdbcType="INTEGER" property="song_id"/>
+        <result column="songListId" jdbcType="INTEGER" property="song_list_id"/>
+        <result column="content" jdbcType="VARCHAR" property="content"/>
+        <result column="createTime" jdbcType="TIMESTAMP" property="create_time"/>
+        <result column="type" jdbcType="TINYINT" property="type"/>
+        <result column="up" jdbcType="INTEGER" property="up"/>
+    </resultMap>
+
+    <sql id="BaseColumnList">
+        id, userId, songId, songListId, content, createTime, type, up
+    </sql>
+
+    <!--增加-->
+    <insert id="insert" parameterType="Comment">
+        insert into comment
+        <trim prefix="(" suffix=")" suffixOverrides=","> /*suffixOverrides用于去掉最后那个逗号*/
+            <if test="id != null">
+                id,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="songId != null">
+                song_id,
+            </if>
+            <if test="songListId != null">
+                song_list_id,
+            </if>
+            <if test="content != null">
+                content,
+            </if>
+            create_time,
+            <if test="type != null">
+                type,
+            </if>
+            <if test="up != null">
+                up,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id},
+            </if>
+            <if test="userId != null">
+                #{userId},
+            </if>
+            <if test="songId != null">
+                #{songId},
+            </if>
+            <if test="songListId != null">
+                #{songListId},
+            </if>
+            <if test="content != null">
+                #{content},
+            </if>
+            now(),
+            <if test="type != null">
+                #{type},
+            </if>
+            <if test="up != null">
+                #{up},
+            </if>
+        </trim>
+    </insert>
+
+    <!--修改-->
+    <update id="update" parameterType="Comment">
+        update comment
+        <set>
+            <if test="userId != null">
+                userId = #{userId},
+            </if>
+            <if test="songId != null">
+                songId = #{songId},
+            </if>
+            <if test="songListId != null">
+                songListId = #{songListId},
+            </if>
+            <if test="content != null">
+                content = #{content},
+            </if>
+            <if test="type != null">
+                type = #{type},
+            </if>
+            <if test="up != null">
+                up = #{up},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--删除-->
+    <delete id="delete" parameterType="Integer">
+        delete from comment where id = #{id}
+    </delete>
+
+    <!--根据id查询-->
+    <select id="selectById" parameterType="Integer" resultMap="BaseResultMap">
+        select
+        <include refid="BaseColumnList"/>
+        from comment where id = #{id}
+    </select>
+
+    <!--查询所有评论-->
+    <select id="selectAllComment" resultMap="BaseResultMap">
+        select
+        <include refid="BaseColumnList"/>
+        from comment
+    </select>
+
+    <!--查询某首歌曲下的所有评论-->
+    <select id="selectBySongId" parameterType="Integer" resultMap="BaseResultMap" >
+        select
+        <include refid="BaseColumnList"/>
+        from comment
+        where song_id = #{songId}
+    </select>
+
+    <!--查询某个歌单下的所有评论-->
+    <select id="selectBySongListId" parameterType="Integer" resultMap="BaseResultMap">
+        select
+        <include refid="BaseColumnList"/>
+        from comment
+        where song_list_id = #{songListId}
+    </select>
+</mapper>

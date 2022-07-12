@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="music.mapper.SongMapper">
+    <resultMap id="BaseResultMap" type="music.domain.Song">
+        <!-- column是数据库中表的栏位名， property是实体对应的属性名-->
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="singer_id" jdbcType="INTEGER" property="singerId"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="introduction" jdbcType="VARCHAR" property="introduction"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="pic" jdbcType="VARCHAR" property="pic"/>
+        <result column="url" jdbcType="VARCHAR" property="url"/>
+    </resultMap>
+
+    <resultMap id="ResultMapWithBLOB" type="music.domain.Song" extends="BaseResultMap">
+        <!-- column是数据库中表的栏位名， property是实体对应的属性名-->
+        <result column="lyric" jdbcType="LONGVARCHAR" property="lyric"/>
+    </resultMap>
+
+    <sql id="BaseColumnList">
+        id, singer_id, name, introduction, create_time, update_time, pic, url
+    </sql>
+
+    <sql id="ColumnListWithBLOB">
+        id, singer_id, name, introduction, create_time, update_time, pic, lyric, url
+    </sql>
+
+    <!--增加-->
+    <insert id="insert" parameterType="Song">
+        insert into song
+        <trim prefix="(" suffix=")" suffixOverrides=","> /*suffixOverrides用于去掉最后那个逗号*/
+            <if test="id != null">
+                id,
+            </if>
+            <if test="singerId != null">
+                singer_id,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="introduction != null">
+                introduction,
+            </if>
+            create_time, update_time,
+            <if test="pic != null">
+                pic,
+            </if>
+            <if test="lyric != null">
+                lyric,
+            </if>
+            <if test="url != null">
+                url,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id},
+            </if>
+            <if test="singerId != null">
+                #{singerId},
+            </if>
+            <if test="name != null">
+                #{name},
+            </if>
+            <if test="introduction != null">
+                #{introduction},
+            </if>
+            now(), now(),  /*当前时间*/
+            <if test="pic != null">
+                #{pic},
+            </if>
+            <if test="lyric != null">
+                #{lyric},
+            </if>
+            <if test="url != null">
+                #{url},
+            </if>
+        </trim>
+    </insert>
+
+    <!--修改-->
+    <update id="update" parameterType="Song">
+        update song
+        <set>
+            <if test="singerId != null">
+                singer_id = #{singerId},
+            </if>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="introduction != null">
+                introduction = #{introduction},
+            </if>
+            update_time = now(),
+            <if test="pic != null">
+                pic = #{pic},
+            </if>
+            <if test="lyric != null">
+                lyric = #{lyric},
+            </if>
+            <if test="url != null">
+                url = #{url},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--删除-->
+    <delete id="delete" parameterType="Integer">
+        delete from song where id = #{id}
+    </delete>
+
+    <!--根据id查询-->
+    <select id="selectById" parameterType="Integer" resultMap="ResultMapWithBLOB">
+        select
+        <include refid="ColumnListWithBLOB"/>
+        from song where id = #{id}
+    </select>
+
+    <!--查询所有歌曲-->
+    <select id="selectAllSong" resultMap="BaseResultMap">
+        select
+        <include refid="ColumnListWithBLOB"/>
+        from song
+    </select>
+
+    <!--根据歌名模糊查询-->
+    <select id="selectLikeName" parameterType="String" resultMap="BaseResultMap" >
+        select
+        <include refid="ColumnListWithBLOB"/>
+        from song
+        where name like "%"#{name}"%"
+    </select>
+
+    <!--根据歌手id查询歌曲-->
+    <select id="selectBySingerId" parameterType="Integer" resultMap="BaseResultMap" >
+        select
+        <include refid="ColumnListWithBLOB"/>
+        from song
+        where singer_id = #{singerId}
+    </select>
+</mapper>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="music.mapper.SongListMapper">
+    <resultMap id="BaseResultMap" type="music.domain.SongList">
+        <!-- column是数据库中表的栏位名， property是实体对应的属性名-->
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="title" jdbcType="VARCHAR" property="title"/>
+        <result column="pic" jdbcType="VARCHAR" property="pic"/>
+        <result column="style" jdbcType="VARCHAR" property="style"/>
+    </resultMap>
+
+    <resultMap id="ResultMapWithBLOB" type="music.domain.SongList" extends="BaseResultMap">
+        <!-- column是数据库中表的栏位名， property是实体对应的属性名-->
+        <result column="introduction" jdbcType="LONGVARCHAR" property="introduction"/>
+    </resultMap>
+
+    <sql id="BaseColumnList">
+        id, title, pic, style
+    </sql>
+
+    <sql id="ColumnListWithBLOB">
+        id, title, pic, introduction, style
+    </sql>
+
+    <!--增加-->
+    <insert id="insert" parameterType="SongList">
+        insert into song_list
+        <trim prefix="(" suffix=")" suffixOverrides=","> /*suffixOverrides用于去掉最后那个逗号*/
+            <if test="id != null">
+                id,
+            </if>
+            <if test="title != null">
+                title,
+            </if>
+            <if test="pic != null">
+                pic,
+            </if>
+            <if test="introduction != null">
+                introduction,
+            </if>
+            <if test="style != null">
+                style,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id},
+            </if>
+            <if test="title != null">
+                #{title},
+            </if>
+            <if test="pic != null">
+                #{pic},
+            </if>
+            <if test="introduction != null">
+                #{introduction},
+            </if>
+            <if test="style != null">
+                #{style},
+            </if>
+        </trim>
+    </insert>
+
+    <!--修改-->
+    <update id="update" parameterType="SongList">
+        update song_list
+        <set>
+            <if test="title != null">
+                title = #{title},
+            </if>
+            <if test="pic != null">
+                pic = #{pic},
+            </if>
+            <if test="introduction != null">
+                introduction = #{introduction},
+            </if>
+            <if test="style != null">
+                style = #{style},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--删除-->
+    <delete id="delete" parameterType="Integer">
+        delete from song_list where id = #{id}
+    </delete>
+
+    <!--根据id查询-->
+    <select id="selectById" parameterType="Integer" resultMap="ResultMapWithBLOB">
+        select
+        <include refid="ColumnListWithBLOB"/>
+        from song_list where id = #{id}
+    </select>
+
+    <!--查询所有歌曲-->
+    <select id="selectAllSongList" resultMap="BaseResultMap">
+        select
+        <include refid="ColumnListWithBLOB"/>
+        from song_list
+    </select>
+
+    <!--根据标题模糊查询列表-->
+    <select id="selectLikeTitle" parameterType="String" resultMap="BaseResultMap" >
+        select
+        <include refid="ColumnListWithBLOB"/>
+        from song_list
+        where title like "%"#{title}"%"
+    </select>
+
+    <!--根据标题精确查询列表-->
+    <select id="selectByTitle" parameterType="String" resultMap="BaseResultMap" >
+        select
+        <include refid="ColumnListWithBLOB"/>
+        from song_list
+        where title = #{title}
+    </select>
+
+    <!--根据风格模糊查询列表-->
+    <select id="selectLikeStyle" parameterType="String" resultMap="BaseResultMap" >
+        select
+        <include refid="ColumnListWithBLOB"/>
+        from song_list
+        where style like "%"#{style}"%"
+    </select>
+</mapper>
