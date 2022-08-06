@@ -9,6 +9,13 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
 
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password: 7895123
+    #表示选的是几号库
+    database: 0
+
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
