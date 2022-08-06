@@ -6,6 +6,7 @@ import music.service.SingerService;
 import music.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.interceptor.CacheOperationInvoker;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,6 +18,9 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 歌手控制类
@@ -26,6 +30,9 @@ import java.util.Date;
 public class SingerController {
     @Autowired
     private SingerService singerService;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 添加歌手
@@ -62,6 +69,13 @@ public class SingerController {
         boolean flag = singerService.insert(singer);
 
         if(flag) {
+            //新增歌手时，需要将歌手数据添加到缓存中
+            String key1 = "singer_all";
+            redisTemplate.opsForList().rightPush(key1, singer);
+
+            String key2 = "singer_" + sex;
+            redisTemplate.opsForList().rightPush(key2, singer);
+
             jsonObject.put(Constants.CODE, 1);
             jsonObject.put(Constants.MSG, "添加成功");
         }else {
@@ -107,6 +121,10 @@ public class SingerController {
         //修改歌手
         boolean flag = singerService.update(singer);
         if(flag) {
+            //若修改歌手成功，则需要删除Redis中原来的缓存
+            Set keys = redisTemplate.keys("*singer*"); //因为没自定义序列化器，所以需要在前面也加*号
+            redisTemplate.delete(keys);
+
             jsonObject.put(Constants.CODE, 1);
             jsonObject.put(Constants.MSG, "更新成功");
         }else {
@@ -127,6 +145,12 @@ public class SingerController {
         //删除歌手
         boolean flag = singerService.delete(Integer.parseInt(id));
 
+        if(flag) {
+            //若删除歌手成功，则需要删除Redis中原来的缓存
+            Set keys = redisTemplate.keys("*singer*"); //因为没自定义序列化器，所以需要在前面也加*号
+            redisTemplate.delete(keys);
+        }
+
         //前端不取json格式数据
         return flag;
     }
@@ -146,7 +170,29 @@ public class SingerController {
      */
     @GetMapping(value = "/selectAllSinger")
     public Object selectAllSinger(HttpServletRequest request) {
-        return singerService.selectAllSinger();
+        List<Singer> list = null;
+        String key = "singer_all";
+
+        //先从Redis中获取数据
+        list = redisTemplate.opsForList().range(key, 0, -1); //获取list中的全部数据
+
+        //若Redis中数据不为空，则直接返回
+        if(list.size() != 0) {
+            return list;
+        }
+
+        //否则从数据库中获取数据
+        list = singerService.selectAllSinger();
+
+        //将数据库中查询到的数据写入Redis
+        for(Singer singer : list) {
+            redisTemplate.opsForList().rightPush(key, singer);
+        }
+
+        //给Redis数据设置过期时间
+        redisTemplate.opsForList().set(key, 60, TimeUnit.MINUTES);
+
+        return list;
     }
 
     /**
@@ -175,7 +221,29 @@ public class SingerController {
     public Object selectBySex(HttpServletRequest request) {
         String sex = request.getParameter("sex").trim();
 
-        return singerService.selectBySex(Byte.parseByte(sex));
+        List<Singer> list = null;
+        String key = "singer_" + sex;
+
+        //先从Redis中获取数据
+        list = redisTemplate.opsForList().range(key, 0, -1); //获取list中的全部数据
+
+        //若Redis中数据不为空，则直接返回
+        if(list.size() != 0) {
+            return list;
+        }
+
+        //否则从数据库中获取数据
+        list = singerService.selectBySex(Byte.parseByte(sex));
+
+        //将数据库中查询到的数据写入Redis
+        for(Singer singer : list) {
+            redisTemplate.opsForList().rightPush(key, singer);
+        }
+
+        //给Redis数据设置过期时间
+        redisTemplate.opsForList().set(key, 60, TimeUnit.MINUTES);
+
+        return list;
     }
 
     /**
@@ -219,6 +287,10 @@ public class SingerController {
 
         //更新成功
         if(flag) {
+            //若更新歌手成功，则需要删除Redis中原来的缓存
+            Set keys = redisTemplate.keys("*singer*"); //因为没自定义序列化器，所以需要在前面也加*号
+            redisTemplate.delete(keys);
+
             jsonObject.put(Constants.CODE, 1);
             jsonObject.put(Constants.MSG, "更新成功");
             //传回存储的地址

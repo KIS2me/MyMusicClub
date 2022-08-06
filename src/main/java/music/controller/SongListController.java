@@ -1,10 +1,12 @@
 package music.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import music.domain.Singer;
 import music.domain.SongList;
 import music.service.SongListService;
 import music.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,6 +16,9 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 歌单控制类
@@ -23,6 +28,9 @@ import java.io.IOException;
 public class SongListController {
     @Autowired
     private SongListService songListService;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     /**
      * 添加歌单
@@ -46,6 +54,10 @@ public class SongListController {
         //修改歌单
         boolean flag = songListService.insert(songList);
         if(flag) {
+            //新增歌单时，需要将歌手数据添加到缓存中
+            String key1 = "songList_all";
+            redisTemplate.opsForList().rightPush(key1, songList);
+
             jsonObject.put(Constants.CODE, 1);
             jsonObject.put(Constants.MSG, "添加成功");
         }else {
@@ -78,6 +90,10 @@ public class SongListController {
         //修改歌单
         boolean flag = songListService.update(songList);
         if(flag) {
+            //若修改歌单成功，则需要删除Redis中原来的缓存
+            Set keys = redisTemplate.keys("songList_all");
+            redisTemplate.delete(keys);
+
             jsonObject.put(Constants.CODE, 1);
             jsonObject.put(Constants.MSG, "更新成功");
         }else {
@@ -98,6 +114,12 @@ public class SongListController {
         //删除歌单
         boolean flag = songListService.delete(Integer.parseInt(id));
 
+        if(flag) {
+            //若修改歌单成功，则需要删除Redis中原来的缓存
+            Set keys = redisTemplate.keys("songList_all");
+            redisTemplate.delete(keys);
+        }
+
         //前端不取json格式数据
         return flag;
     }
@@ -117,7 +139,29 @@ public class SongListController {
      */
     @RequestMapping(value = "/selectAllSongList", method = RequestMethod.GET)
     public Object selectAllSongList(HttpServletRequest request) {
-        return songListService.selectAllSongList();
+        List<SongList> list = null;
+        String key = "songList_all";
+
+        //先从Redis中获取数据
+        list = redisTemplate.opsForList().range(key, 0, -1); //获取list中的全部数据
+
+        //若Redis中数据不为空，则直接返回
+        if(list.size() != 0) {
+            return list;
+        }
+
+        //否则从数据库中获取数据
+        list = songListService.selectAllSongList();
+
+        //将数据库中查询到的数据写入Redis
+        for(SongList songList : list) {
+            redisTemplate.opsForList().rightPush(key, songList);
+        }
+
+        //给Redis数据设置过期时间
+        redisTemplate.opsForList().set(key, 60, TimeUnit.MINUTES);
+
+        return list;
     }
 
     /**
@@ -190,6 +234,10 @@ public class SongListController {
 
             //更新成功
             if(flag) {
+                //若修改歌单成功，则需要删除Redis中原来的缓存
+                Set keys = redisTemplate.keys("songList_all");
+                redisTemplate.delete(keys);
+
                 jsonObject.put(Constants.CODE, 1);
                 jsonObject.put(Constants.MSG, "更新成功");
                 //传回存储的地址
