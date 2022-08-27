@@ -16,9 +16,17 @@ spring:
     #表示选的是几号库
     database: 0
 
+  rabbitmq:
+    host: 127.0.0.1
+    port: 15672
+    username: TuXin
+    password: 7895123
+    virtual-host: /tuxin
+
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
+
   servlet:
     multipart:
       #设置最大容量稍大一些，防止容量过小导致音乐无法上传
