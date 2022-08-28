@@ -24,18 +24,18 @@ public class CollectController {
      * 添加收藏
      */
     @RequestMapping(value = "/add",method = RequestMethod.POST)
-    public Object addCollect(HttpServletRequest request){
+    public Object addCollect(HttpServletRequest request) {
         JSONObject jsonObject = new JSONObject();
         String userId = request.getParameter("userId");
         String type = request.getParameter("type");
         String songId = request.getParameter("songId");
 
-        if(songId==null || songId.equals("")){
+        if(songId == null || songId.equals("")) {
             jsonObject.put(Constants.CODE, 0);
             jsonObject.put(Constants.MSG, "收藏歌曲为空");
             return jsonObject;
         }
-        if(CollectService.isSongExist(Integer.parseInt(userId), Integer.parseInt(songId))){
+        if(CollectService.isSongExist(Integer.parseInt(userId), Integer.parseInt(songId))) {
             jsonObject.put(Constants.CODE,2);
             jsonObject.put(Constants.MSG,"已收藏");
             return jsonObject;
