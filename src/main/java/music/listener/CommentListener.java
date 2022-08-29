@@ -1,10 +1,7 @@
 package music.listener;
 
 import com.rabbitmq.client.Channel;
-import music.controller.CommentController;
-import music.domain.Collect;
 import music.domain.Comment;
-import music.service.CollectService;
 import music.service.CommentService;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
