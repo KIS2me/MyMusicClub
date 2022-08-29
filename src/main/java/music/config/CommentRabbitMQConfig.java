@@ -50,7 +50,7 @@ public class CommentRabbitMQConfig {
     @Bean
     public Binding commentBinding() {
         /**
-         * destination：绑定关系的目的地
+         * destination：绑定关系的目的地，即队列Queue
          * DestinationType：绑定关系的类型
          * exchange：绑定关系的交换机名
          * routingKey：绑定关系的路由键

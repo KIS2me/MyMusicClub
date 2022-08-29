@@ -61,8 +61,8 @@ public class CommentController {
         //     jsonObject.put(Constants.MSG, "添加失败");
         // }
 
-        //将Collect对象发到消息队列中
-        rabbitTemplate.convertAndSend(comment);
+        //将Comment对象发到消息队列中
+        rabbitTemplate.convertAndSend("comment-exchange", "comment.create", comment);
 
         jsonObject.put(Constants.CODE, 1);
         jsonObject.put(Constants.MSG, "收藏成功");

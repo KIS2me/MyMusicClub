@@ -58,7 +58,7 @@ public class CollectController {
         // }
 
         //将Collect对象发到消息队列中
-        rabbitTemplate.convertAndSend(collect);
+        rabbitTemplate.convertAndSend("collect-exchange", "collect.create", collect);
 
         jsonObject.put(Constants.CODE, 1);
         jsonObject.put(Constants.MSG, "收藏成功");

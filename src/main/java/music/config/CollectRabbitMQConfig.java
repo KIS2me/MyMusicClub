@@ -1,11 +1,9 @@
 package music.config;
 
-import music.domain.Collect;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -52,7 +50,7 @@ public class CollectRabbitMQConfig {
     @Bean
     public Binding collectBinding() {
         /**
-         * destination：绑定关系的目的地
+         * destination：绑定关系的目的地，即队列Queue
          * DestinationType：绑定关系的类型
          * exchange：绑定关系的交换机名
          * routingKey：绑定关系的路由键
