@@ -5,9 +5,7 @@ import music.domain.Collect;
 import music.service.CollectService;
 import music.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -23,7 +21,7 @@ public class CollectController {
     /**
      * 添加收藏
      */
-    @RequestMapping(value = "/add",method = RequestMethod.POST)
+    @PostMapping(value = "/add")
     public Object addCollect(HttpServletRequest request) {
         JSONObject jsonObject = new JSONObject();
         String userId = request.getParameter("userId");
@@ -36,18 +34,18 @@ public class CollectController {
             return jsonObject;
         }
         if(CollectService.isSongExist(Integer.parseInt(userId), Integer.parseInt(songId))) {
-            jsonObject.put(Constants.CODE,2);
+            jsonObject.put(Constants.CODE, 2);
             jsonObject.put(Constants.MSG,"已收藏");
             return jsonObject;
         }
 
         //保存到收藏的对象中
-        Collect Collect = new Collect();
-        Collect.setUserId(Integer.parseInt(userId));
-        Collect.setType(new Byte(type));
-        Collect.setSongId(Integer.parseInt(songId));
+        Collect collect = new Collect();
+        collect.setUserId(Integer.parseInt(userId));
+        collect.setType(new Byte(type));
+        collect.setSongId(Integer.parseInt(songId));
 
-        boolean flag = CollectService.insert(Collect);
+        boolean flag = CollectService.insert(collect);
         if(flag) {
             jsonObject.put(Constants.CODE, 1);
             jsonObject.put(Constants.MSG, "收藏成功");
@@ -62,7 +60,7 @@ public class CollectController {
     /**
      * 删除收藏
      */
-    @RequestMapping(value = "/delete",method = RequestMethod.GET)
+    @GetMapping(value = "/delete")
     public Object deleteCollect(HttpServletRequest request){
         String id = request.getParameter("id");
         boolean flag = CollectService.delete(Integer.parseInt(id));
@@ -73,7 +71,7 @@ public class CollectController {
     /**
      * 删除某个用户收藏的歌曲
      */
-    @RequestMapping(value = "/deleteByUserIdAndSongId",method = RequestMethod.GET)
+    @GetMapping(value = "/deleteByUserIdAndSongId")
     public Object deleteByUserIdAndSongId(HttpServletRequest request){
         String userId = request.getParameter("userId");
         String songId = request.getParameter("songId");
@@ -85,7 +83,7 @@ public class CollectController {
     /**
      * 查询所有收藏
      */
-    @RequestMapping(value = "/selectAllCollect",method = RequestMethod.GET)
+    @GetMapping(value = "/selectAllCollect")
     public Object selectAllCollect(HttpServletRequest request){
         return CollectService.selectAllCollect();
     }
@@ -93,7 +91,7 @@ public class CollectController {
     /**
      * 查询某个用户的收藏列表
      */
-    @RequestMapping(value = "/selectByUserId",method = RequestMethod.GET)
+    @GetMapping(value = "/selectByUserId")
     public Object selectByUserId(HttpServletRequest request){
         String userId = request.getParameter("userId");
         return CollectService.selectByUserId(Integer.parseInt(userId));
