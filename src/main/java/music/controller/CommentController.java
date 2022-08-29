@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import music.domain.Comment;
 import music.service.CommentService;
 import music.utils.Constants;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -19,6 +20,9 @@ import javax.servlet.http.HttpServletRequest;
 public class CommentController {
     @Autowired
     private CommentService commentService;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     /**
      * 添加评论
@@ -47,15 +51,21 @@ public class CommentController {
             comment.setSongListId(Integer.parseInt(songListId));
         }
 
-        //添加到数据库
-        boolean flag = commentService.insert(comment);
-        if(flag) {
-            jsonObject.put(Constants.CODE, 1);
-            jsonObject.put(Constants.MSG, "添加成功");
-        }else {
-            jsonObject.put(Constants.CODE, 0);
-            jsonObject.put(Constants.MSG, "添加失败");
-        }
+        // //添加到数据库
+        // boolean flag = commentService.insert(comment);
+        // if(flag) {
+        //     jsonObject.put(Constants.CODE, 1);
+        //     jsonObject.put(Constants.MSG, "添加成功");
+        // }else {
+        //     jsonObject.put(Constants.CODE, 0);
+        //     jsonObject.put(Constants.MSG, "添加失败");
+        // }
+
+        //将Collect对象发到消息队列中
+        rabbitTemplate.convertAndSend(comment);
+
+        jsonObject.put(Constants.CODE, 1);
+        jsonObject.put(Constants.MSG, "收藏成功");
 
         return jsonObject;
     }
