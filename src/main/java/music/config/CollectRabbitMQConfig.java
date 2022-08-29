@@ -28,7 +28,9 @@ public class CollectRabbitMQConfig {
          */
         Queue queue = new Queue("collect.queue",
                 true,
-                false, false);
+                false,
+                false);
+
         return queue;
     }
 

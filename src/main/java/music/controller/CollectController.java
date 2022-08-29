@@ -4,9 +4,9 @@ import com.alibaba.fastjson.JSONObject;
 import music.domain.Collect;
 import music.service.CollectService;
 import music.utils.Constants;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -17,6 +17,9 @@ import javax.servlet.http.HttpServletRequest;
 public class CollectController {
     @Autowired
     private CollectService CollectService;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     /**
      * 添加收藏
@@ -45,14 +48,20 @@ public class CollectController {
         collect.setType(new Byte(type));
         collect.setSongId(Integer.parseInt(songId));
 
-        boolean flag = CollectService.insert(collect);
-        if(flag) {
-            jsonObject.put(Constants.CODE, 1);
-            jsonObject.put(Constants.MSG, "收藏成功");
-        }else {
-            jsonObject.put(Constants.CODE,0);
-            jsonObject.put(Constants.MSG,"收藏失败");
-        }
+        // boolean flag = CollectService.insert(collect);
+        // if(flag) {
+        //     jsonObject.put(Constants.CODE, 1);
+        //     jsonObject.put(Constants.MSG, "收藏成功");
+        // }else {
+        //     jsonObject.put(Constants.CODE,0);
+        //     jsonObject.put(Constants.MSG,"收藏失败");
+        // }
+
+        //将Collect对象发到消息队列中
+        rabbitTemplate.convertAndSend(collect);
+
+        jsonObject.put(Constants.CODE, 1);
+        jsonObject.put(Constants.MSG, "收藏成功");
 
         return jsonObject;
     }
