@@ -5,6 +5,7 @@ import music.domain.Consumer;
 import music.service.ConsumerService;
 import music.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,7 +37,8 @@ public class ConsumerController {
         JSONObject jsonObject = new JSONObject();
 
         String username = request.getParameter("username").trim(); //删除字符串的头尾空白符
-        String password = request.getParameter("password").trim();
+        //对密码进行MD5加密处理
+        String password = DigestUtils.md5DigestAsHex(request.getParameter("password").trim().getBytes());
         String sex = request.getParameter("sex").trim();
         String phoneNum = request.getParameter("phoneNum").trim();
         String email = request.getParameter("email").trim();
@@ -106,7 +108,8 @@ public class ConsumerController {
 
         String id = request.getParameter("id").trim();
         String username = request.getParameter("username").trim(); //删除字符串的头尾空白符
-        String password = request.getParameter("password").trim();
+        //对密码进行MD5加密处理
+        String password = DigestUtils.md5DigestAsHex(request.getParameter("password").trim().getBytes());
         String sex = request.getParameter("sex").trim();
         String phoneNum = request.getParameter("phoneNum").trim();
         String email = request.getParameter("email").trim();
@@ -180,7 +183,8 @@ public class ConsumerController {
         JSONObject jsonObject = new JSONObject();
 
         String username = request.getParameter("username").trim();
-        String password = request.getParameter("password").trim();
+        //对密码进行MD5加密处理
+        String password = DigestUtils.md5DigestAsHex(request.getParameter("password").trim().getBytes());
 
         boolean flag = consumerService.verifyPassword(username, password);
         if(flag) {
@@ -202,7 +206,8 @@ public class ConsumerController {
         JSONObject jsonObject = new JSONObject();
 
         String username = request.getParameter("username").trim();
-        String password = request.getParameter("password").trim();
+        //对密码进行MD5加密处理
+        String password = DigestUtils.md5DigestAsHex(request.getParameter("password").trim().getBytes());
 
         if(username == null || username.equals("")) {
             jsonObject.put(Constants.CODE, 0);

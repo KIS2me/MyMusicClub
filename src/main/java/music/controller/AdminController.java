@@ -5,6 +5,7 @@ import music.domain.Admin;
 import music.service.AdminService;
 import music.utils.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,7 +28,9 @@ public class AdminController {
         JSONObject jsonObject = new JSONObject(); //传回前端的是json类型的数据
 
         String username = request.getParameter("username");
-        String password = request.getParameter("password");
+        //对密码进行MD5加密处理
+        String password = DigestUtils.md5DigestAsHex(request.getParameter("password").getBytes());
+
         //验证信息
         Admin admin = adminService.login(username);
 
